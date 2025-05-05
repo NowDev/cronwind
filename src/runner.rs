@@ -46,9 +46,9 @@ impl Runner {
                 }
             }
             
-            // Check every minute
+            // Check every second
             drop(jobs);
-            sleep(Duration::from_secs(60)).await;
+            sleep(Duration::from_secs(1)).await;
         }
     }
 } 

@@ -2,7 +2,7 @@
   "jobs": [
     {
       "name": "job1 every minute",
-      "schedule": "* * * * * *",
+      "schedule": "1 * * * * *",
       "kind": "command",
       "config": {
         "command": "echo 'Hello, world!'"
