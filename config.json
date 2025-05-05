@@ -1,0 +1,29 @@
+{
+  "jobs": [
+    {
+      "name": "job1 every minute",
+      "schedule": "* * * * * *",
+      "kind": "command",
+      "config": {
+        "command": "echo 'Hello, world!'"
+      },
+      "outputs": [
+        {
+          "kind": "file",
+          "config": {
+            "path": "job1.log"
+          }
+        }
+      ]
+    },
+    {
+      "name": "job2 every 30 minutes",
+      "schedule": "* 30 * * * *",
+      "kind": "request",
+      "config": {
+        "url": "https://api.github.com"
+      },
+      "outputs": []
+    }
+  ]
+}

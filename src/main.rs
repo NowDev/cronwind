@@ -1,8 +1,7 @@
 mod config;
-// mod job;
-// mod runner;
+mod job;
+mod runner;
 mod logger;
-// mod watcher;
 
 use clap::Parser;
 use std::error::Error;
@@ -30,10 +29,13 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let config_path = "config.json";
     let config = config::load_config(config_path)?;
 
-    if config.jobs.len() == 0 {
+    if config.jobs.is_empty() {
         log::info!("No jobs defined in config, exiting...");
         return Ok(());
     }
+
+    let runner = runner::Runner::new(config).await?;
+    runner.start().await?;
 
     Ok(())
 }

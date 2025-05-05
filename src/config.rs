@@ -5,54 +5,66 @@ use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
 
+// Config entry
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub jobs: Vec<Job>,
-    pub outputs: Vec<Output>,
 }
 
+// Job Inputs
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Job {
     pub name: String,
     pub schedule: String,
-    pub command: String,
+    pub kind: JobKind,
+    pub config: JobConfig,
+    pub outputs: Vec<Output>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(untagged)]
+pub enum JobConfig {
+    Command {
+        command: String,
+    },
+    Request {
+        url: String,
+    },
+}
+
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum JobKind {
+    Command,
+    Request,
+}
+
+// Job Outputs
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Output {
-    pub name: String,
     #[serde(flatten)]
     pub kind: OutputKind,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(tag = "type", content = "config")]
+#[serde(tag = "kind", content = "config")]
 pub enum OutputKind {
     #[serde(rename = "file")]
     File { path: String },
-    #[serde(rename = "discord")]
-    Discord { url: String },
+    #[serde(rename = "request")]
+    Request { url: String },
 }
 
 pub fn load_config(path: &str) -> Result<Config, Box<dyn Error>> {
-    // Check if the file exists
     if !Path::new(path).exists() {
-    // Create a new file
-    let file = File::create(path)?;
-
-    // Write the default config to the file
-    let config = Config { jobs: vec![], outputs: vec![] };
+        let file = File::create(path)?;
+        let config = Config { jobs: vec![] };
         serde_json::to_writer(&file, &config)?;
     }
 
     let file = File::open(path)?;
-
-    // Create a buffered reader for the file
     let reader = BufReader::new(file);
-
-    // Read the JSON contents of the file as an instance of `Config`.
     let config = serde_json::from_reader(reader)?;
 
-    // Return the config
     Ok(config)
 }
