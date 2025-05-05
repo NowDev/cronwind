@@ -37,7 +37,7 @@ impl Runner {
                 if job.should_run() {
                     match job.execute().await {
                         Ok(output) => {
-                            log::info!("Job '{}' completed successfully: {}", job.name, output);
+                            log::info!("Job '{}' completed: {}", job.name, output);
                         }
                         Err(e) => {
                             log::error!("Job '{}' failed: {}", job.name, e);

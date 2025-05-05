@@ -11,7 +11,7 @@ A simple and flexible cron job runner written in Rust that supports both command
 - 📝 Logging support
 - 🔒 Type-safe configuration
 
-## Installation
+## Build the project
 
 1. Make sure you have Rust installed. If not, install it from [rustup.rs](https://rustup.rs/)
 
@@ -39,9 +39,10 @@ The binary will be available at `target/release/cronwind`
 To run in daemon mode (background):
 ```bash
 ./cronwind --daemon
+# Logs will be written to ~/.cronwind/cronwind.log
 ```
 
-> Note: Service/systemd support coming soon!
+> Note: Service/systemd support soon
 
 ## Configuration
 
@@ -77,6 +78,7 @@ Jobs are defined in `config.json`. Each job requires:
       "schedule": "* 30 * * * *",
       "kind": "request",
       "config": {
+        "method": "GET",
         "url": "https://api.github.com"
       },
       "outputs": []
@@ -100,4 +102,4 @@ Examples:
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+It's just a personal utility, use it as you want.
