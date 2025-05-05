@@ -2,8 +2,9 @@ use cron::Schedule;
 use std::error::Error;
 use std::str::FromStr;
 use tokio::process::Command;
-use crate::config::JobConfig;
+use crate::config::{JobConfig, HttpMethod};
 use chrono::{DateTime, Utc};
+use reqwest::Method;
 
 pub struct JobRunner {
     pub name: String,
@@ -68,9 +69,23 @@ impl JobRunner {
         
                 Ok(stdout)
             }
-            JobConfig::Request { url } => {
+            JobConfig::Request { method, url } => {
                 let client = reqwest::Client::new();
-                let response = client.get(url).send().await?;
+                let method = match method {
+                    HttpMethod::Get => Method::GET,
+                    HttpMethod::Post => Method::POST,
+                    HttpMethod::Put => Method::PUT,
+                    HttpMethod::Delete => Method::DELETE,
+                    HttpMethod::Patch => Method::PATCH,
+                    HttpMethod::Head => Method::HEAD,
+                };
+
+                let response = client.request(method, url).send().await?;
+                
+                if !response.status().is_success() {
+                    return Err(format!("Request failed with status: {}", response.status()).into());
+                }
+
                 let body = response.text().await?;
                 Ok(body)
             }

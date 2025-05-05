@@ -22,12 +22,24 @@ pub struct Job {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum HttpMethod {
+    Get,
+    Post,
+    Put,
+    Delete,
+    Patch,
+    Head,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 #[serde(untagged)]
 pub enum JobConfig {
     Command {
         command: String,
     },
     Request {
+        method: HttpMethod,
         url: String,
     },
 }

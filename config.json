@@ -21,6 +21,7 @@
       "schedule": "* 30 * * * *",
       "kind": "request",
       "config": {
+        "method": "GET",
         "url": "https://api.github.com"
       },
       "outputs": []
