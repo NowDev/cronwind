@@ -1,10 +1,11 @@
-use cron::Schedule;
 use std::error::Error;
 use std::str::FromStr;
+use cron::Schedule;
 use tokio::process::Command;
-use crate::config::{JobConfig, HttpMethod};
 use chrono::{DateTime, Utc};
-use reqwest::Method;
+use reqwest::{Method, Body};
+
+use crate::config::{JobConfig, HttpMethod};
 
 pub struct JobRunner {
     pub name: String,
@@ -57,19 +58,19 @@ impl JobRunner {
                         .output()
                         .await?
                 };
-        
+
                 self.last_run = Some(Utc::now());
-        
+
                 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
                 let stderr = String::from_utf8_lossy(&output.stderr).to_string();
-        
+
                 if !output.status.success() {
                     return Err(format!("Command failed: {}", stderr).into());
                 }
-        
+
                 Ok(stdout)
             }
-            JobConfig::Request { method, url } => {
+            JobConfig::Request { method, url, body, headers } => {
                 let client = reqwest::Client::new();
                 let method = match method {
                     HttpMethod::Get => Method::GET,
@@ -80,8 +81,20 @@ impl JobRunner {
                     HttpMethod::Head => Method::HEAD,
                 };
 
-                let response = client.request(method, url).send().await?;
-                
+                let mut request = client.request(method, url);
+
+                if let Some(body) = body {
+                    request = request.body(Body::from(body.to_string()));
+                }
+
+                if let Some(headers) = headers {
+                    for (key, value) in headers {
+                        request = request.header(key, value);
+                    }
+                }
+
+                let response = request.send().await?;
+
                 if !response.status().is_success() {
                     return Err(format!("Request failed with status: {}", response.status()).into());
                 }
@@ -91,4 +104,4 @@ impl JobRunner {
             }
         }
     }
-} 
+}

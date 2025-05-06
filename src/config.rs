@@ -1,9 +1,11 @@
-use serde::{ Deserialize, Serialize };
-
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
 use std::io::BufReader;
 use std::path::Path;
+use serde::{ Deserialize, Serialize };
+
+use crate::utils;
 
 // Config entry
 #[derive(Serialize, Deserialize, Debug)]
@@ -41,6 +43,8 @@ pub enum JobConfig {
     Request {
         method: HttpMethod,
         url: String,
+        body: Option<String>,
+        headers: Option<HashMap<String, String>>,
     },
 }
 
@@ -76,7 +80,23 @@ pub fn load_config(path: &str) -> Result<Config, Box<dyn Error>> {
 
     let file = File::open(path)?;
     let reader = BufReader::new(file);
-    let config = serde_json::from_reader(reader)?;
+    let mut config: Config = serde_json::from_reader(reader)?;
+
+    let env_vars = HashMap::from_iter(std::env::vars());
+
+    // Expand env ${VARS} in body and header data.
+    for job in &mut config.jobs {
+        if let JobConfig::Request { body, headers, .. } = &mut job.config {
+            if let Some(body) = body {
+                *body = utils::expand_env_vars(&body, &env_vars);
+            }
+            if let Some(headers) = headers {
+                for (_key, value) in headers {
+                    *value = utils::expand_env_vars(&value, &env_vars);
+                }
+            }
+        }
+    }
 
     Ok(config)
 }

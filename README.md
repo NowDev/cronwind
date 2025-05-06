@@ -10,6 +10,7 @@ A simple and flexible cron job runner written in Rust that supports both command
 - 💻 Command execution jobs
 - 📝 Logging support
 - 🔒 Type-safe configuration
+- 🔍 Environment `${VAR}` parsing
 
 ## Build the project
 
@@ -86,6 +87,7 @@ Jobs are defined in `config.json`. Each job requires:
   ]
 }
 ```
+> Note: See [config.json](config.json) for request body/header and env parsing examples.
 
 ### Cron Schedule Format
 

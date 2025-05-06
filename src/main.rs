@@ -2,12 +2,13 @@ mod config;
 mod job;
 mod runner;
 mod logger;
+mod utils;
 
-use clap::Parser;
 use std::error::Error;
-use daemonize::Daemonize;
 use std::fs::{self, File};
 use std::sync::Arc;
+use clap::Parser;
+use daemonize::Daemonize;
 use tokio::sync::watch;
 use tokio::runtime::Runtime;
 
@@ -87,7 +88,6 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     } else {
         logger::setup_logging(false);
-        log::info!("Running in foreground mode...");
     }
 
     // For graceful shutdowns
